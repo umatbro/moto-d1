@@ -11,7 +11,7 @@ def create_test_board(size):
     return board
 
 
-class BoardTest(unittest.TestCase):
+class BoardTests(unittest.TestCase):
     def test_get_neighbours(self):
         board = create_test_board(3)
         self.assertListEqual(board.get_neighbour_states(1, 0), [
@@ -21,19 +21,50 @@ class BoardTest(unittest.TestCase):
         ])
 
     def test_simple_update(self):
-        init_config = [(0, 0), (1, 1), (0, 1)]
+        alive_cells = [(0, 0), (1, 1), (0, 1)]
         board = Board(3)
-        board.set_alive(init_config)
+        board.set_alive_cells(alive_cells)
         board.update()
         states = board.list_of_values
-        self.assertEqual(states, [
+        self.assertListEqual(states, [
             [1, 1, 0],
             [1, 1, 0],
             [0, 0, 0]
         ])
 
+    def test_simple_update2(self):
+        init_config = [(0, 0), (0, 1), (0, 2)]
+        board = Board(3)
+        board.set_alive_cells(init_config)
+        board.update()
+        states = board.list_of_values
+        self.assertListEqual(states, [
+            [0, 1, 0],
+            [0, 1, 0],
+            [0, 0, 0]
+        ])
+
+    def test_overpopulation(self):
+        init_config = [(0, 1), (1, 0), (1, 1), (1, 2), (2, 1)]
+        board = Board(3)
+        board.set_alive_cells(init_config)
+        board.update()
+        states = board.list_of_values
+        self.assertListEqual(states, [
+            [1, 1, 1],
+            [1, 0, 1],
+            [1, 1, 1]
+        ])
+
 
 class CellTest(unittest.TestCase):
+    def test_is_alive(self):
+        alive_cell = Cell(ALIVE)
+        self.assertTrue(alive_cell.is_alive)
+
+        dead_cell = Cell(DEAD)
+        self.assertFalse(dead_cell.is_alive)
+
     def test_create_life(self):
         cell = Cell(DEAD)
         neighbours = [1, 1, 1, 0, 0, 0, 0, None, None]
@@ -62,3 +93,7 @@ class CellTest(unittest.TestCase):
         cell = Cell(ALIVE)
         neighbours = [1, 0, 0, 0, 0, 0, 0]
         self.assertFalse(cell.will_survive(neighbours))
+
+
+if __name__ == '__main__':
+    unittest.main()

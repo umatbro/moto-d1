@@ -1,4 +1,3 @@
-import traceback
 from copy import deepcopy
 from game_of_life.cell import Cell, DEAD, ALIVE
 
@@ -22,7 +21,7 @@ class Board:
         self.prev_board = deepcopy(self.board)
         return self
 
-    def set_alive(self, coords: list):
+    def set_alive_cells(self, coords: list):
         for row, col in coords:
             self.board[row][col] = Cell(ALIVE)
             self.prev_board[row][col] = Cell(ALIVE)
@@ -70,11 +69,7 @@ class Board:
             return Cell(None)
         if col < 0 or col > len(self.prev_board) - 1:
             return Cell(None)
-        try:
-            return self.prev_board[row][col]
-        except IndexError:
-            traceback.print_exc()
-            print('Row {} col {}'.format(row, col))
+        return self.prev_board[row][col]
 
     def __setitem__(self, key, value):
         row, cell = key[0], key[1]
@@ -84,6 +79,6 @@ class Board:
 if __name__ == '__main__':
     init_config = [(1, 1), (0, 1)]
     board = Board(3)
-    board.set_alive(init_config)
+    board.set_alive_cells(init_config)
     board.update()
     print(board)
