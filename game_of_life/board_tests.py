@@ -20,6 +20,18 @@ class BoardTest(unittest.TestCase):
             ALIVE, DEAD, None
         ])
 
+    def test_simple_update(self):
+        init_config = [(0, 0), (1, 1), (0, 1)]
+        board = Board(3)
+        board.set_alive(init_config)
+        board.update()
+        states = board.list_of_values
+        self.assertEqual(states, [
+            [1, 1, 0],
+            [1, 1, 0],
+            [0, 0, 0]
+        ])
+
 
 class CellTest(unittest.TestCase):
     def test_create_life(self):

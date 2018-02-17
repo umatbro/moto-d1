@@ -1,3 +1,4 @@
+import traceback
 from copy import deepcopy
 from game_of_life.cell import Cell, DEAD, ALIVE
 
@@ -6,14 +7,26 @@ class Board:
     def __init__(self, size):
         self.board = []
         for i in range(size):
-            self.board.append([Cell(DEAD) for i in range(size)])
-            self.prev_board = deepcopy(self.board)
+            self.board.append([Cell(DEAD) for j in range(size)])
+        self.prev_board = deepcopy(self.board)
 
     def update(self):
         for row in range(len(self.board)):
             for col in range(len(self.board)):
                 cell_neighbours = self.get_neighbour_states(row, col)
-                self[row, col].will_survive(cell_neighbours)
+                if self[row, col].will_survive(cell_neighbours):
+                    self[row, col] = Cell(ALIVE)
+                else:
+                    self[row, col] = Cell(DEAD)
+
+        self.prev_board = deepcopy(self.board)
+        return self
+
+    def set_alive(self, coords: list):
+        for row, col in coords:
+            self.board[row][col] = Cell(ALIVE)
+            self.prev_board[row][col] = Cell(ALIVE)
+        return self
 
     def get_neighbour_states(self, row, col):
         """
@@ -33,9 +46,19 @@ class Board:
 
         return neighbour_states
 
+    @property
+    def list_of_values(self):
+        """
+        List of integer values - 1 ALIVE, 0 - DEAD
+        """
+        result = []
+        for row in self.prev_board:
+            result.append([cell.state for cell in row])
+        return result
+
     def __str__(self):
         result = ''
-        for row in self.board:
+        for row in self.prev_board:
             for cell in row:
                 result += 'x' if cell.state == ALIVE else 'o'
             result += '\n'
@@ -45,9 +68,13 @@ class Board:
         row, col = item[0], item[1]
         if row < 0 or row > len(self.prev_board) - 1:
             return Cell(None)
-        if col < 0 or row > len(self.prev_board) - 1:
+        if col < 0 or col > len(self.prev_board) - 1:
             return Cell(None)
-        return self.prev_board[row][col]
+        try:
+            return self.prev_board[row][col]
+        except IndexError:
+            traceback.print_exc()
+            print('Row {} col {}'.format(row, col))
 
     def __setitem__(self, key, value):
         row, cell = key[0], key[1]
@@ -55,8 +82,8 @@ class Board:
 
 
 if __name__ == '__main__':
+    init_config = [(1, 1), (0, 1)]
     board = Board(3)
+    board.set_alive(init_config)
+    board.update()
     print(board)
-    board[0, 1] = Cell(ALIVE)
-    print(board)
-    print(board[1, 1].state)
