@@ -27,6 +27,16 @@ class BankTest(unittest.TestCase):
         account.deposit(200)
         self.assertEqual(300, account.balance)
 
+    def test_withdrawal(self):
+        account = Account(400)
+        account.withdraw(200)
+        self.assertEqual(200, account.balance)
+
+    def test_withdrawal_with_not_enough_money(self):
+        account = Account(100)
+        with self.assertRaises(Exception):
+            account.withdraw(200)
+
     def test_print_transaction(self):
         account = Account()
         account.deposit(100, date(2017, 2, 1))
@@ -56,14 +66,23 @@ class BankTest(unittest.TestCase):
         with mock.patch('sys.stdout', new=io.StringIO()) as fake_stdout:
             account.print()
 
-        val = fake_stdout.getvalue()
+        was_printed = fake_stdout.getvalue()
 
         self.assertEqual(
             'DATE | AMOUNT | BALANCE\n'
             '01/02/2017 | 100 | 100\n'
             '01/03/2017 | 200 | 300\n'
-            '01/04/2017 | -100 | 200\n', val
+            '01/04/2017 | -100 | 200\n', was_printed
         )
+
+    def test_print_header_with_mock(self):
+        account = Account()
+        with mock.patch('sys.stdout', new=io.StringIO()) as fake_stdout:
+            account.print()
+
+        was_printed = fake_stdout.getvalue()
+
+        self.assertEqual('DATE | AMOUNT | BALANCE\n', was_printed)
 
 
 if __name__ == '__main__':
